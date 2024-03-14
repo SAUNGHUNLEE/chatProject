@@ -1,5 +1,6 @@
 package com.chat.project.chat.model;
 
+import com.chat.project.chat.dto.UserDTO;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -88,5 +90,18 @@ public class User implements UserDetails {
     public boolean isEnabled(){
         return true; // true -> 사용 가능
     }
+
+    public UserDTO toUserDTO(){
+        return UserDTO.builder()
+                .email(this.getEmail())
+                .password(this.getPassword())
+                .name(this.getName())
+                .joinDay(LocalDate.now())
+                .role(this.getRole())
+                .state(this.getState())
+                .birthDay(this.getBirthDay())
+                .build();
+    }
+
 
 }

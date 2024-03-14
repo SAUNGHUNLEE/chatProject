@@ -2,7 +2,7 @@ package com.chat.project.chat.service;
 
 
 import com.chat.project.chat.model.User;
-import com.chat.project.chat.persistence.MemberRepository;
+import com.chat.project.chat.persistence.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 public class UserDetailServices implements UserDetailsService {
 
     @Autowired
-    private MemberRepository memberRepository;
+    private UserRepository userRepository;
 
     @Override
     public User loadUserByUsername(String email){
-        return memberRepository.findByEmail(email)
+        return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException((email)));
     }
 

@@ -54,7 +54,7 @@ public class SpringSecurityConfig {
         // http 시큐리티 빌더
         http
                 .csrf((csrf) -> csrf
-                        .ignoringRequestMatchers("/api/**", "/api/token/**")
+                        .ignoringRequestMatchers("/unauth/**")
                 ) // csrf를 비활성화할 경로 설정
                 .httpBasic(withDefaults()) // 기본 http 인증 사용하지 않음
                 // 세션 사용

@@ -32,16 +32,16 @@ public class EmailToken {
     @Column(name = "expired")
     private boolean expired;
 
-    @Column(name = "member_id")
-    private int memberId;
+    @Column(name = "email")
+    private String email;
 
     // 이메일 인증 토큰 생성
-    public static EmailToken createEmailToken(int memberId) {
+    public static EmailToken createEmailToken(String email) {
         EmailToken emailTokenEntity = new EmailToken();
         emailTokenEntity.emailTokenId = UUID.randomUUID().toString(); // UUID 생성
         emailTokenEntity.expirationDate = LocalDateTime.now().plusMinutes(EMAIL_TOKEN_EXPIRATION_TIME_VALUE); // 5분 후 만료
         emailTokenEntity.expired = false;
-        emailTokenEntity.memberId = memberId;
+        emailTokenEntity.email = email;
 
         return emailTokenEntity;
     }
