@@ -29,7 +29,18 @@
                         <span id="emailFeedback" class="text-warning"></span>
                         <button type="button" class="btn btn-success" id="verifyEmail">인증하기</button>
                         <span id="emailVerificationFeedback" class="text-success"></span>
+
+                        <div class="mb-3">
+                            <label for="emailToken" class="form-label text-white">토큰입력</label>
+                            <input type="text" class="form-control" id="emailToken" placeholder="Enter your verification token">
+                            <span id="tokenFeedback" class="text-warning"></span>
+                        </div>
+
+                        <!-- Verify Token Button -->
+                        <button type="button" class="btn btn-info" id="verifyToken">확인</button>
+                        <span id="verificationResult" class="text-info"></span>
                     </div>
+
                     <div class="mb-3">
                         <label class="form-label text-white">Password</label>
                         <input type="password" class="form-control" name="password">

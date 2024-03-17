@@ -24,8 +24,8 @@ public class EmailService {
     @Transactional
     public boolean verifyEmail(String token) throws Exception{
         EmailToken findEmailToken = emailTokenService.findByIdAndExpirationDateAfterAndExpired(token);
-        // 성공 시 유저의 인증내용 변경
-        Optional<User> findMember = userRepository.findByEmail(findEmailToken.getEmail());
+       // 성공 시 유저의 인증내용 변경
+/*        Optional<User> findMember = userRepository.findByEmail(findEmailToken.getEmail());
         findEmailToken.setTokenToUsed(); // 사용 완료
         if(findMember.isPresent()){
             User userEntity = findMember.get();
@@ -34,7 +34,8 @@ public class EmailService {
             return true;
         }else{
             throw new RuntimeException("토큰 에러");
-        }
+        }*/
+        return true;
     }
 
 }

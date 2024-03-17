@@ -75,17 +75,23 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    //인증 메일
-    @PostMapping("/send-verification-email")
-    public ResponseEntity<?> sendVerificationEmail(@RequestBody String email){
-        try{
-            emailTokenService.createEmailToken(email);
-            return ResponseEntity.ok().build();
+    @PostMapping("/send")
+    public ResponseEntity<?> sendVerificationEmail(@RequestBody UserDTO.ViewConfirmEmail email) {
+        try {
+            emailTokenService.createEmailToken(email.getEmail());
+            System.out.println(email.getEmail() + " 이메일");
+            // HashMap을 사용하여 JSON 형태의 응답을 생성
+            HashMap<String, String> response = new HashMap<>();
+            response.put("message", "인증 메일이 전송되었습니다.");
+            return ResponseEntity.ok().body(response);
         } catch (Exception e) {
             log.error("Error sending verification email: ", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error sending email.");
+            HashMap<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "인증 메일 전송에 실패했습니다.");
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
+
 
 
 

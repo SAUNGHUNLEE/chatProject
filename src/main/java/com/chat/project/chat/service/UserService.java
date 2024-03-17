@@ -39,7 +39,7 @@ public class UserService {
                     .password(bCryptPasswordEncoder.encode(userDTO.getPassword()))
                     .name(userDTO.getName())
                     .joinDay(LocalDate.now())
-                    .state(0)
+                    .state(1)
                     .role(userDTO.getRole())
                     .birthDay(userDTO.getBirthDay())
                     .build();
