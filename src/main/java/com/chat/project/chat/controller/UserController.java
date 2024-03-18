@@ -1,5 +1,6 @@
 package com.chat.project.chat.controller;
 
+import com.chat.project.chat.dto.PhoneVerifyDTO;
 import com.chat.project.chat.dto.UserDTO;
 import com.chat.project.chat.persistence.UserRepository;
 import com.chat.project.chat.service.UserService;
@@ -7,6 +8,7 @@ import com.chat.project.chat.service.email.EmailService;
 import com.chat.project.chat.service.email.EmailTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,24 +40,29 @@ public class UserController {
     }
 
     @PostMapping("/user")
-    public String signup(UserDTO userDTO){
+    public String signup(UserDTO userDTO) {
         userService.save(userDTO);
-                return "redirect:/unauth/login";
+        return "redirect:/unauth/login";
     }
 
     @GetMapping("/login")
-    public String login(){
-        return "login";
+    public String login(HttpSession session) {
+        session.setAttribute("user","SrpingUser");
+        return "로그인 되었습니다.";
     }
 
     @GetMapping("/logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response){
-        new SecurityContextLogoutHandler().logout(request,response, SecurityContextHolder.getContext().getAuthentication());
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
         return "redirect:/login";
     }
 
+    @GetMapping("/check")
+    public String checkSession(HttpSession session){
+        return session.getAttribute("user") + "님";
+    }
     @GetMapping("/signup")
-    public String signup(){
+    public String signup() {
         return "signup";
     }
 
@@ -68,9 +75,9 @@ public class UserController {
     }
 
     @GetMapping("/check-name")
-    public ResponseEntity<Map<String,Boolean>> checkName(@RequestParam String name){
+    public ResponseEntity<Map<String, Boolean>> checkName(@RequestParam String name) {
         boolean isNameTaken = userRepository.existsByName(name);
-        Map<String,Boolean> response = new HashMap<>();
+        Map<String, Boolean> response = new HashMap<>();
         response.put("isNameTaken", isNameTaken);
         return ResponseEntity.ok(response);
     }
@@ -92,6 +99,36 @@ public class UserController {
         }
     }
 
+
+    //인증번호 보냄
+    @PostMapping("/send-phone")
+    public ResponseEntity<?> sendSms(@RequestBody PhoneVerifyDTO.SmsCertificationRequest requestDto) {
+        try {
+            userService.sendSms(requestDto);
+            HashMap<String, String> response = new HashMap<>();
+            response.put("message", "인증 번호가 전송되었습니다.");
+            return ResponseEntity.ok().body(response);
+        } catch (IllegalArgumentException e) {
+            HashMap<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "인증 번호 전송에 실패했습니다.");
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    //인증번호 확인
+    @PostMapping("/confirm-phone")
+    public ResponseEntity<?> SmsVerification(@RequestBody PhoneVerifyDTO.SmsCertificationRequest requestDto) {
+        try {
+            userService.verifySms(requestDto);
+            HashMap<String, String> response = new HashMap<>();
+            response.put("message", "인증 성공.");
+            return ResponseEntity.ok().body(response);
+        } catch (IllegalArgumentException e) {
+            HashMap<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "인증 실패");
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
 
 
 

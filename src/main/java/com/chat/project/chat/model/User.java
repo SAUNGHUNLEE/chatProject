@@ -51,6 +51,9 @@ public class User implements UserDetails {
     @Column(name = "birthday")
     private LocalDate birthDay;
 
+    @Column(name = "phone")
+    private int phone;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities(){
         return List.of(new SimpleGrantedAuthority("user"));
@@ -100,6 +103,7 @@ public class User implements UserDetails {
                 .role(this.getRole())
                 .state(this.getState())
                 .birthDay(this.getBirthDay())
+                .profile(this.getProfile())
                 .build();
     }
 

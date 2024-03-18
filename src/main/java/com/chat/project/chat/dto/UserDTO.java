@@ -5,8 +5,10 @@ import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -23,6 +25,14 @@ public class UserDTO {
     private int role;
     private int state;
     private LocalDate birthDay;
+    private String profile;
+    private int phone;
+
+    private List<MultipartFile> profileImgRequest;
+
+    public boolean checkProfileImgRequestNull() {
+        return this.profileImgRequest != null;
+    }
 
 
     @Getter
@@ -31,5 +41,7 @@ public class UserDTO {
         private String email;
 
     }
+
+
 
 }

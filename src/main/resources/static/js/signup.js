@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
         nameValid: false,
         passwordValid: false,
         emailVerified: false,
-        //birthdayValid: false // 생년월일 유효성 추가
+        birthdayValid: false // 생년월일 유효성 추가
     };
 
     const emailInput = document.querySelector('input[name="email"]');
@@ -26,6 +26,44 @@ document.addEventListener("DOMContentLoaded", function () {
     const emailTokenInput = document.getElementById('emailToken');
     const verifyTokenButton = document.getElementById('verifyToken');
     const verificationResultSpan = document.getElementById('verificationResult');
+    const requestVerify = document.getElementById("requestVerify");
+    const phoneInput = document.querySelector('input[name="phone"]');
+
+    const confirmVerify = document.getElementById("confirmVerify");
+    const verificationCode = document.getElementById('verificationCode');
+
+    requestVerify.addEventListener('click',function(){
+        const phone = phoneInput.value;
+        fetch(`/unauth/send-phone`,{
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({phone:phone})
+        })
+            .then(response => response.json())
+            .then(data => alert('인증번호가 전송되었습니다.'))
+            .catch((error) => console.error('Error:', error));
+    });
+
+    confirmVerify.addEventListener('click',function(){
+        const phone = phoneInput.value;
+        fetch(`/unauth/confirm-phone`,{
+            method: 'POST',
+            headers: {
+                'Content-Type':'application/json'
+            },
+            body: JSON.stringify({phone:phone})
+        })
+            .then(response => response.json())
+            .then(data => alert('인증 성공.'))
+            .catch((error) => console.error('Error:', error));
+    });
+
+
+
+
+
 
     verifyTokenButton.addEventListener('click', function() {
         const emailToken = emailTokenInput.value;
@@ -40,6 +78,7 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(data => {
                 verificationResultSpan.textContent = '인증성공';
+                conditions.emailVerified = true;
                 updateSubmitButtonState()
                 // 추가적인 성공 처리 로직
             })
@@ -148,10 +187,10 @@ document.addEventListener("DOMContentLoaded", function () {
         conditions.passwordValid = passwordInput.value.length >= 8;
         updateSubmitButtonState();
     });
-/*    birthdayInput.addEventListener("input", function () {
+   birthdayInput.addEventListener("input", function () {
         conditions.birthdayValid = birthdayInput.value !== '';
         updateSubmitButtonState();
-    });*/
+    });
 
     updateSubmitButtonState()
 });
