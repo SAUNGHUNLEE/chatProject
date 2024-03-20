@@ -4,13 +4,14 @@ import com.chat.project.chat.dto.UserDTO;
 import com.chat.project.chat.model.User;
 import com.chat.project.chat.persistence.UserRepository;
 import com.chat.project.chat.service.CustomerUserDetails;
-import com.chat.project.chat.service.UserService;
+import com.chat.project.chat.service.UnauthUserService;
 import com.chat.project.chat.service.email.EmailTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,8 +27,8 @@ import java.util.Map;
 @Slf4j
 @Controller
 @RequestMapping("/unauth")
-public class UserController {
-    private final UserService userService;
+public class UnauthUserController {
+    private final UnauthUserService unauthUserService;
     @Autowired
     private EmailTokenService emailTokenService;
 
@@ -35,19 +36,19 @@ public class UserController {
     private UserRepository userRepository;
 
     @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UnauthUserController(UnauthUserService unauthUserService) {
+        this.unauthUserService = unauthUserService;
     }
 
     @PostMapping("/user")
     public String signup(UserDTO userDTO) {
-        userService.save(userDTO);
+        unauthUserService.save(userDTO);
         return "redirect:/unauth/login";
     }
 
     @PostMapping("/login")
     public String login(@RequestBody User user, HttpSession session){
-        User loginUser = userService.login(user.getEmail(), user.getPassword());
+        User loginUser = unauthUserService.login(user.getEmail(), user.getPassword());
         if(loginUser != null){
             CustomerUserDetails customerUserDetails = new CustomerUserDetails(loginUser);
             Authentication authentication = new UsernamePasswordAuthenticationToken(customerUserDetails,null,customerUserDetails.getAuthorities());
@@ -120,7 +121,7 @@ public class UserController {
     @PostMapping("/send-phone")
     public ResponseEntity<?> sendSms(@RequestBody UserDTO.SmsCertificationRequest requestDto) {
         try {
-            userService.sendSms(requestDto);
+            unauthUserService.sendSms(requestDto);
             HashMap<String, String> response = new HashMap<>();
             response.put("message", "인증 번호가 전송되었습니다.");
             return ResponseEntity.ok().body(response);
@@ -135,7 +136,7 @@ public class UserController {
     @PostMapping("/confirm-phone")
     public ResponseEntity<?> SmsVerification(@RequestBody UserDTO.SmsCertificationRequest requestDto) {
         try {
-            userService.verifySms(requestDto);
+            unauthUserService.verifySms(requestDto);
             HashMap<String, String> response = new HashMap<>();
             response.put("message", "인증 성공.");
             return ResponseEntity.ok().body(response);
@@ -145,7 +146,18 @@ public class UserController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
-
+    @PostMapping("/find-email")
+    public ResponseEntity<?> findUserEmail(@RequestBody UserDTO.LookForEmail lookForEmailDTO) {
+        try {
+            UserDTO userDTO = unauthUserService.getUserEmail(lookForEmailDTO);
+            System.out.println("이메일 찾기 성공");
+            return ResponseEntity.ok(userDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
 
 
 }

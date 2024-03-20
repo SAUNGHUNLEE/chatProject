@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Service
-public class UserService {
+public class UnauthUserService {
 
     private final SmsCertificationUtil smsUtil;
     private final SmsCertificationDao smsCertificationDao;
@@ -27,7 +27,7 @@ public class UserService {
     @Value("${file.path.member.profile}")
     private String memberPath;
 
-    public UserService(SmsCertificationUtil smsUtil, SmsCertificationDao smsCertificationDao, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository) {
+    public UnauthUserService(SmsCertificationUtil smsUtil, SmsCertificationDao smsCertificationDao, BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository) {
         this.smsUtil = smsUtil;
         this.smsCertificationDao = smsCertificationDao;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
@@ -159,4 +159,18 @@ public class UserService {
         System.out.println("로그인 실패");
         return null;
     }
+
+
+    //핸드폰 + 이름 -> 이메일찾기
+    public UserDTO getUserEmail(UserDTO.LookForEmail lookForEmailDTO){
+        String email = userRepository.lookforEmail(lookForEmailDTO.getName(), lookForEmailDTO.getPhone())
+                .orElseThrow(() -> new IllegalArgumentException("해당하는 사용자 이메일이 없습니다."));
+
+        UserDTO userDTO = UserDTO.builder()
+                .email(email)
+                .build();
+
+        return userDTO;
+    }
+
 }

@@ -48,6 +48,12 @@ public class UserDTO {
         private String verification; //인증 번호
     }
 
+    @Getter
+    public static class LookForEmail{
+        private String name;
+        private int phone;
+    }
+
 
 
 }
