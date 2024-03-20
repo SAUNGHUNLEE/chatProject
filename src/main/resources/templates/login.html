@@ -21,24 +21,25 @@
                 <p class="text-white-50 mt-2 mb-5">서비스를 사용하려면 로그인을 해주세요!</p>
 
                 <div class = "mb-2">
-                    <form action="/login" method="POST">
+                    <form action="/login" method="POST" id="loginForm">
                         <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
                         <div class="mb-3">
                             <label class="form-label text-white">Email address</label>
-                            <input type="email" class="form-control" name="username">
+                            <input type="email" class="form-control" name="email" id="email">
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-white">Password</label>
-                            <input type="password" class="form-control" name="password">
+                            <input type="password" class="form-control" name="password" id="password">
                         </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                     </form>
-
+                    <div id="errorMessage" style="display:none;">로그인 실패. 이메일 또는 비밀번호를 확인해주세요.</div>
                     <button type="button" class="btn btn-secondary mt-3" onclick="location.href='/unauth/signup'">회원가입</button>
                 </div>
             </div>
         </div>
     </div>
 </section>
+<script src="/js/login.js"></script>
 </body>
 </html>

@@ -19,6 +19,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const passwordFeedback = document.getElementById('passwordFeedback');
     const verifyEmailButton = document.getElementById('verifyEmail');
 
+    const loginForm = document.getElementById('loginForm');
+
     // CSRF 토큰과 헤더 이름을 가져오는 코드
     const csrfToken = document.querySelector('meta[name="_csrf"]').content;
     const csrfHeaderName = document.querySelector('meta[name="_csrf_header"]').content;
@@ -31,6 +33,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const confirmVerify = document.getElementById("confirmVerify");
     const verificationCode = document.getElementById('verificationCode');
+
+
+
+
 
     requestVerify.addEventListener('click',function(){
         const phone = phoneInput.value;
@@ -47,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     confirmVerify.addEventListener('click',function(){
-        const phone = phoneInput.value;
+        const phone = verificationCode.value;
         fetch(`/unauth/confirm-phone`,{
             method: 'POST',
             headers: {

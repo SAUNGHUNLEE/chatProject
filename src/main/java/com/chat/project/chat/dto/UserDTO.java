@@ -42,6 +42,12 @@ public class UserDTO {
 
     }
 
+    @Getter
+    public static class SmsCertificationRequest {
+        private String phone;
+        private String verification; //인증 번호
+    }
+
 
 
 }

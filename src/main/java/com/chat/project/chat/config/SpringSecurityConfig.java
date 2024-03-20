@@ -1,24 +1,17 @@
 package com.chat.project.chat.config;
 
-import com.chat.project.chat.service.UserDetailServices;
-import jakarta.servlet.DispatcherType;
+import com.chat.project.chat.service.CustomerUserDetailServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.web.filter.CorsFilter;
-import org.springframework.http.HttpMethod;
 
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -26,7 +19,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class SpringSecurityConfig {
 
     @Autowired
-    private UserDetailServices userService;
+    private CustomerUserDetailServices userService;
 
     // 스프링 시큐리티 기능 비활성화
 /*
@@ -82,7 +75,7 @@ public class SpringSecurityConfig {
                 )
                 .formLogin((formLogin) -> formLogin
                         .loginPage("/login")
-                        .defaultSuccessUrl("/mainpage")
+                        .defaultSuccessUrl("/")
                         .permitAll())
                 .logout((logout) -> logout
                         .logoutSuccessUrl("/login?logout")

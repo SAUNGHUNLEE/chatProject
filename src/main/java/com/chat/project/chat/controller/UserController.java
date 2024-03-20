@@ -1,19 +1,19 @@
 package com.chat.project.chat.controller;
 
-import com.chat.project.chat.dto.PhoneVerifyDTO;
 import com.chat.project.chat.dto.UserDTO;
+import com.chat.project.chat.model.User;
 import com.chat.project.chat.persistence.UserRepository;
+import com.chat.project.chat.service.CustomerUserDetails;
 import com.chat.project.chat.service.UserService;
-import com.chat.project.chat.service.email.EmailService;
 import com.chat.project.chat.service.email.EmailTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
@@ -45,10 +45,26 @@ public class UserController {
         return "redirect:/unauth/login";
     }
 
+    @PostMapping("/login")
+    public String login(@RequestBody User user, HttpSession session){
+        User loginUser = userService.login(user.getEmail(), user.getPassword());
+        if(loginUser != null){
+            CustomerUserDetails customerUserDetails = new CustomerUserDetails(loginUser);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(customerUserDetails,null,customerUserDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            session.setAttribute("USER",loginUser);
+            System.out.println("로그인성공");
+            return "redirect:/unauth/signup";
+        }else{
+            System.out.println("로그인 실패");
+            return "redirect:/unauth/login";
+        }
+    }
+
     @GetMapping("/login")
-    public String login(HttpSession session) {
-        session.setAttribute("user","SrpingUser");
-        return "로그인 되었습니다.";
+    public String showLoginForm() {
+        return "login"; // "login.html" 타임리프 템플릿을 찾아 렌더링
     }
 
     @GetMapping("/logout")
@@ -102,7 +118,7 @@ public class UserController {
 
     //인증번호 보냄
     @PostMapping("/send-phone")
-    public ResponseEntity<?> sendSms(@RequestBody PhoneVerifyDTO.SmsCertificationRequest requestDto) {
+    public ResponseEntity<?> sendSms(@RequestBody UserDTO.SmsCertificationRequest requestDto) {
         try {
             userService.sendSms(requestDto);
             HashMap<String, String> response = new HashMap<>();
@@ -117,7 +133,7 @@ public class UserController {
 
     //인증번호 확인
     @PostMapping("/confirm-phone")
-    public ResponseEntity<?> SmsVerification(@RequestBody PhoneVerifyDTO.SmsCertificationRequest requestDto) {
+    public ResponseEntity<?> SmsVerification(@RequestBody UserDTO.SmsCertificationRequest requestDto) {
         try {
             userService.verifySms(requestDto);
             HashMap<String, String> response = new HashMap<>();

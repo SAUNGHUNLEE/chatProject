@@ -1,7 +1,6 @@
 package com.chat.project.chat.service;
 
 
-import com.chat.project.chat.dto.PhoneVerifyDTO;
 import com.chat.project.chat.dto.UserDTO;
 import com.chat.project.chat.model.User;
 import com.chat.project.chat.persistence.UserRepository;
@@ -15,6 +14,7 @@ import util.SmsCertificationUtil;
 
 import java.io.File;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -118,7 +118,7 @@ public class UserService {
     }
 
 
-    public void sendSms(PhoneVerifyDTO.SmsCertificationRequest requestDto){
+    public void sendSms(UserDTO.SmsCertificationRequest requestDto){
         try {
             String phone = requestDto.getPhone();
             int randomNumber = (int) (Math.random() * 9000) + 1000;
@@ -132,17 +132,31 @@ public class UserService {
         }
     }
 
-    public void verifySms(PhoneVerifyDTO.SmsCertificationRequest requestDto) {
+    public void verifySms(UserDTO.SmsCertificationRequest requestDto) {
         if (isVerify(requestDto)) {
             throw new IllegalArgumentException("인증번호가 일치하지 않습니다.");
         }
         smsCertificationDao.removeSmsCertification(requestDto.getPhone());
     }
 
-    public boolean isVerify(PhoneVerifyDTO.SmsCertificationRequest requestDto) {
+    public boolean isVerify(UserDTO.SmsCertificationRequest requestDto) {
         return !(smsCertificationDao.hasKey(requestDto.getPhone()) &&
                 smsCertificationDao.getSmsCertification(requestDto.getPhone())
                         .equals(requestDto.getVerification()));
     }
 
+    // 예외적으로 인증처리를위해서 return을 user entity사용
+    public User login(String email, String password) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            if (bCryptPasswordEncoder.matches(password, user.getPassword())) {
+                return user;
+            }
+        }
+        // 로그인 실패 시 null 반환
+        System.out.println("로그인 실패");
+        return null;
+    }
 }

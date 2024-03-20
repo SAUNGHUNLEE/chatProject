@@ -11,8 +11,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 @Data
@@ -21,7 +23,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "user")
-public class User implements UserDetails {
+public class User implements Serializable {
+    private static final long serialVersionUID = 1L; // serialVersionUID 추가
+
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -53,46 +58,6 @@ public class User implements UserDetails {
 
     @Column(name = "phone")
     private int phone;
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities(){
-        return List.of(new SimpleGrantedAuthority("user"));
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    @Override
-    public String getPassword() {
-        return password;
-    }
-
-    // 계정 만료 여부 반환
-    @Override
-    public boolean isAccountNonExpired(){
-        // 만료되었는지 확인하는 로직
-        return true; // true -> 만료되지 않음
-    }
-
-    // 계정 잠금 여부 반환
-    @Override
-    public boolean isAccountNonLocked(){
-        return true; // true -> 잠금되지 않음
-    }
-
-    // 패스워드 만료 여부 반환
-    @Override
-    public boolean isCredentialsNonExpired(){
-        return true; // true -> 만료되지 않음
-    }
-
-    // 계정 사용 가능 여부 변환
-    @Override
-    public boolean isEnabled(){
-        return true; // true -> 사용 가능
-    }
 
     public UserDTO toUserDTO(){
         return UserDTO.builder()
