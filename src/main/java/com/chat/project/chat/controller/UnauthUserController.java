@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -116,7 +117,6 @@ public class UnauthUserController {
         }
     }
 
-
     //인증번호 보냄
     @PostMapping("/send-phone")
     public ResponseEntity<?> sendSms(@RequestBody UserDTO.SmsCertificationRequest requestDto) {
@@ -156,8 +156,41 @@ public class UnauthUserController {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
+    @PostMapping("/check-user-email")
+    public ResponseEntity<?> getCheckUserEmail(@RequestBody UserDTO.CheckForEmail checkForEmailDTO) {
+        try {
+            UserDTO userDTO = unauthUserService.getCheckEmail(checkForEmailDTO);
+            System.out.println("이메일 매칭 성공");
+            return ResponseEntity.ok(userDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @PostMapping("/change-pw")
+    public String changePassword(@RequestBody Map<String, String> payload) throws Exception{
+        String token = payload.get("token");
+        String newPassword = payload.get("newPassword");
+        boolean isChanged = unauthUserService.changePasswordWithToken(token, newPassword);
+        if (isChanged) {
+            System.out.println("비밀번호 변경 성공. 다시 로그인 해주세요");
+            return "redirect:/unauth/login";
+        } else {
+            System.out.println("변경 실패 다시 해 주세요");
+            return "redirect:/unauth/change-password-form";
+        }
+    }
+
+
+
 
 
 }

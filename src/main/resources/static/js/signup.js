@@ -111,8 +111,9 @@ document.addEventListener("DOMContentLoaded", function () {
                     emailVerificationFeedback.textContent = '인증 메일이 전송되었습니다. 메일을 확인해주세요.';
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    emailVerificationFeedback.textContent = '메일 전송 실패. 다시 시도해주세요.';
+                    response.text().then(errorMessage => {
+                        console.error('Error:', errorMessage);
+                    });
                 });
         }
     });

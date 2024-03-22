@@ -48,12 +48,31 @@ public class UserDTO {
         private String verification; //인증 번호
     }
 
+    //이메일 찾기(핸드폰+이름으로)
     @Getter
     public static class LookForEmail{
         private String name;
         private int phone;
     }
 
+    //이메일 검증(핸드폰+이름)
+    @Getter
+    public static class CheckForEmail{
+        private String name;
+        private String email;
+        private int phone;
+
+    }
+
+    //비밀번호 변경
+    @Getter
+    @Setter
+    public static class ChangePassWord{
+        private String email;
+        private String token;
+        private String curpw;
+        private String chpw;
+    }
 
 
 }
