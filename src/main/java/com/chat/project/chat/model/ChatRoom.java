@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.UUID;
 
 @Data
 @Entity
@@ -16,7 +18,7 @@ import java.time.LocalDateTime;
 @Table(name = "chat_room")
 public class ChatRoom {
     public enum MessageType {
-        ENTER, TALK, LEAVE // 예시로 사용할 수 있는 메시지 타입
+        ENTER, TALK, OUT,ERROR // 환영 인사 , 말하는 사람, 나가는 사람,에러
     }
 
     @Id
@@ -32,7 +34,7 @@ public class ChatRoom {
     @Column(name = "room_id")
     private String roomId;
 
-    @Column(name = "sender")
+    @Column(name = "sender") //유저 name 이랑 동일
     private String sender;
 
     @Column(name = "message")
@@ -45,4 +47,6 @@ public class ChatRoom {
     private String roomName;
 
 
+
 }
+

@@ -35,15 +35,16 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.session:spring-session-data-redis'
 
-
-
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation 'org.webjars:stomp-websocket:2.3.4'
 	// Jakarta Mail (JavaMail) 의존성 명시적 추가
 /*	implementation 'com.sun.mail:jakarta.mail:2.0.1'*/
 	annotationProcessor 'org.projectlombok:lombok'
 
-
-
-
+// sockjs
+	implementation 'org.webjars:sockjs-client:1.5.1'
+// gson
+	implementation 'com.google.code.gson:gson:2.9.0'
 
 
 	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
