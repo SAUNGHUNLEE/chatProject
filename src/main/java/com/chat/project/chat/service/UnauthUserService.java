@@ -161,6 +161,8 @@ public class UnauthUserService {
     }
 
     // 예외적으로 인증처리를위해서 return을 user entity사용
+    //스프링 시큐리티 사용시 필요 없음
+/*
     public User login(String email, String password) {
         Optional<User> optionalUser = userRepository.findByEmail(email);
 
@@ -174,6 +176,7 @@ public class UnauthUserService {
         System.out.println("로그인 실패");
         return null;
     }
+*/
 
 
     //핸드폰 + 이름 -> 이메일찾기

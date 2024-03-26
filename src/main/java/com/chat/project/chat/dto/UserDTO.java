@@ -17,6 +17,7 @@ import java.util.List;
 public class UserDTO {
 
     //name joinday profile role state birthday
+    private int id;
     private String email;
     private String password;
     private String name;
@@ -34,6 +35,15 @@ public class UserDTO {
         return this.profileImgRequest != null;
     }
 
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    public static class ViewName{
+        private String name;
+        private int id;
+
+    }
 
     @Getter
     @NoArgsConstructor

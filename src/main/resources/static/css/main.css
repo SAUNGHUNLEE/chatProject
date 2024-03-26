@@ -1,0 +1,19 @@
+/* main.css */
+body {
+    font-family: 'Arial', sans-serif;
+}
+.header {
+    background-color: #000;
+    color: white;
+    padding: 10px 15px;
+    text-align: right;
+}
+.header a {
+    color: white;
+    text-decoration: none;
+    padding-left: 15px;
+}
+.main-content {
+    margin-top: 50px;
+    text-align: center;
+}

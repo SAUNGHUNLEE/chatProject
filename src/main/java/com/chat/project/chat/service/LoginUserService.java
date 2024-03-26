@@ -31,4 +31,16 @@ public class LoginUserService {
     }
 
 
+    public UserDTO.ViewName getUserName(UserDTO userDTO){
+        User user = userRepository.findById(userDTO.getId())
+                .orElseThrow(() -> new IllegalArgumentException("조건에 해당하는 사용자가 없습니다."));
+
+        UserDTO.ViewName uv = UserDTO.ViewName.builder()
+                .id(user.getId())
+                .name(user.getName())
+                .build();
+
+        return uv;
+    }
+
 }

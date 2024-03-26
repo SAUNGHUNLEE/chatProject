@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     const loginForm = document.getElementById('loginForm');
+    const loginEmailInput = document.getElementById('email');
     const emailInput = document.getElementById('pwEmail');
     const passwordInput = document.getElementById('password');
     const emailVerificationFeedback = document.getElementById('emailVerificationFeedback');
@@ -19,29 +20,51 @@ document.addEventListener("DOMContentLoaded", function () {
     // 비밀번호 변경 모달 내의 폼과 버튼 참조
     const changePasswordForm = document.getElementById('changePasswordForm');
     const submitChangePasswordButton = document.getElementById('submitChangePassword');
+// HTML에서 CSRF 토큰 값 가져오기
+    const csrfToken = document.querySelector('input[name="_csrf"]').value;
 
 
+    // Fetch 요청 전에 이메일과 비밀번호 출력
     loginForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        email = emailInput.value;
+        email = loginEmailInput.value;
         password = passwordInput.value;
+
+        console.log("로그인시도", email, password);
 
         fetch("/unauth/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken
             },
             body: JSON.stringify({email: email, password: password}),
         })
             .then(response => {
+                // 상태 코드를 로그로 출력
+                console.log(response.status, response.statusText);
                 if (response.ok) {
-                    window.location.href = "/unauth/signup"; // 로그인 성공 시 이동할 페이지
+                    // 로그인이 성공한 경우, /login/main으로 리다이렉션
+                    window.location.href = "/login/main";
                 } else {
-                    document.getElementById("errorMessage").style.display = "로그인실패"; // 에러 메시지 표시
+                    // 로그인 실패한 경우, 응답을 JSON 형태로 변환하여 다음 단계로 전달
+                    throw new Error("로그인 실패");
                 }
             })
-            .catch(error => console.error("Error:", error));
-    });
+            .then(data => {
+                // 로그인 실패 시 응답 데이터에서 오류 메시지 등을 확인할 수 있음
+                console.log(data);
+                // 로그인 실패 시 에러 메시지를 표시하는 로직을 여기에 추가할 수 있습니다.
+                const errorMessage = document.getElementById('errorMessage');
+                if(errorMessage) {
+                    errorMessage.innerText = "아이디 및 비밀번호가 일치하지 않습니다.";
+                    errorMessage.style.display = 'block'; // 오류 메시지를 보이게 설정
+                }
+            })
+            .catch(error => {
+                // 네트워크 오류 등의 이유로 요청 자체가 실패한 경우
+                console.error("로그인실패:", error);
+            });
 
 
     findEmailButton.addEventListener('click', function () {
@@ -186,4 +209,4 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
 
-});
+});}

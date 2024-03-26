@@ -5,12 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisHttpSession;
+import org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,21 +24,25 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@EnableRedisHttpSession
 public class SpringSecurityConfig implements WebMvcConfigurer {
 
     @Autowired
     private CustomerUserDetailServices userService;
-
-    // 스프링 시큐리티 기능 비활성화
-/*
+    // 패스워드 인코더로 사용할 빈 등록
     @Bean
-    public WebSecurityCustomizer configure(){
-        return (web) -> web.ignoring()
-                //.requestMatchers(toH2Console())
-                .requestMatchers("/templates/**")
-                .requestMatchers("/static/**");
+    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+        return new BCryptPasswordEncoder();
     }
-*/
+
+    // AuthenticationManager 빈 등록
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    // 기존 설정 코드...
+
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -54,46 +64,49 @@ public class SpringSecurityConfig implements WebMvcConfigurer {
                 "/swagger-resources/**"
         };
 
-        // http 시큐리티 빌더
         http
                 .csrf((csrf) -> csrf
                         .ignoringRequestMatchers("/unauth/**")
-                ) // csrf를 비활성화할 경로 설정
-                .httpBasic(withDefaults()) // 기본 http 인증 사용하지 않음
-                // 세션 사용
+                )
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 )
-                // 특정 경로에 대한 접근 허용 (인증되지 않은 사용자도 접근 가능)
                 .authorizeHttpRequests((authorize) -> authorize
-                        //.requestMatchers(SWAGGER_URI).permitAll()
-                        .requestMatchers("/login","signup","/member").permitAll()
                         .requestMatchers(
                                 "/",
+                                "/signup",
                                 "/unauth/**",
                                 "/token/**",
                                 "/error",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
+                                "/css/**",
                                 "/js/**",
-                                "/templates/**"
+                                "/templates/**",
+                                "/logout/**"
                         ).permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/user/**").hasAuthority("ROLE_USER")
-                        // 그 외 모든 요청은 인증 필요
                         .anyRequest().authenticated()
                 )
                 .formLogin((formLogin) -> formLogin
-                        .loginPage("/login")
-                        .defaultSuccessUrl("/")
-                        .permitAll())
+                        .loginPage("/unauth/login") // 로그인 페이지 URL
+                        .loginProcessingUrl("/unauth/login") // 로그인 처리 URL
+                        .defaultSuccessUrl("/login/main")
+                        .failureHandler(failureHandler())
+                        .usernameParameter("email") // 로그인 폼의 사용자 이름 파라미터 이름
+                        .passwordParameter("password") // 로그인 폼의 비밀번호 파라미터 이름
+                        .permitAll()
+                )
                 .logout((logout) -> logout
-                        .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll());
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/unauth/login")
+                        .invalidateHttpSession(true)//세션 무효화
+                        .clearAuthentication(true)//인증 정보 삭제
+                        .deleteCookies("JSESSIONID") //쿠키삭제
+                        .permitAll()
+                );
         http
-                // 인증되지 않은 요청에 대한 처리 (401 Unauthorized 응답)
                 .exceptionHandling(exceptionHandling ->
                         exceptionHandling.authenticationEntryPoint(
                                 new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)
@@ -104,12 +117,12 @@ public class SpringSecurityConfig implements WebMvcConfigurer {
     }
 
 
-
-    // 패스워드 인코더로 사용할 빈 등록
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
-        return new BCryptPasswordEncoder();
+    public AuthenticationFailureHandler failureHandler(){
+        return new CustomAuthFailureHandler();
     }
+
+
 
 }
 

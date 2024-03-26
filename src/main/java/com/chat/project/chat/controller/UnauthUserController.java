@@ -3,22 +3,28 @@ package com.chat.project.chat.controller;
 import com.chat.project.chat.dto.UserDTO;
 import com.chat.project.chat.model.User;
 import com.chat.project.chat.persistence.UserRepository;
+import com.chat.project.chat.service.CustomerUserDetailServices;
 import com.chat.project.chat.service.CustomerUserDetails;
 import com.chat.project.chat.service.UnauthUserService;
 import com.chat.project.chat.service.email.EmailTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -36,6 +42,10 @@ public class UnauthUserController {
     @Autowired
     private UserRepository userRepository;
 
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     @Autowired
     public UnauthUserController(UnauthUserService unauthUserService) {
         this.unauthUserService = unauthUserService;
@@ -47,38 +57,72 @@ public class UnauthUserController {
         return "redirect:/unauth/login";
     }
 
-    @PostMapping("/login")
-    public String login(@RequestBody User user, HttpSession session){
-        User loginUser = unauthUserService.login(user.getEmail(), user.getPassword());
-        if(loginUser != null){
-            CustomerUserDetails customerUserDetails = new CustomerUserDetails(loginUser);
-            Authentication authentication = new UsernamePasswordAuthenticationToken(customerUserDetails,null,customerUserDetails.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            session.setAttribute("USER",loginUser);
-            System.out.println("로그인성공");
-            return "redirect:/unauth/signup";
-        }else{
-            System.out.println("로그인 실패");
-            return "redirect:/unauth/login";
+    //시큐리티 사용 시, 검증은 UserDetailsService에 loadUserByUsername에서 함
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody User user) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            System.out.println(authentication + "인증정보,로그인 성공");
+            return ResponseEntity.ok().body("로그인 성공");
+        } catch (AuthenticationException e) {
+            // 인증 실패 시 처리 로직
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인 실패");
         }
     }
 
+
+    @GetMapping("/login")
+    public String login(@RequestParam(value = "error", required = false) String error,
+                        @RequestParam(value = "exception", required = false) String exception,
+                        Model model) {
+
+        /* 에러와 예외를 모델에 담아 view resolve */
+        model.addAttribute("error", error);
+        model.addAttribute("exception", exception);
+        return "login";
+    }
+
+    @GetMapping("/main")
+    public String main(Model model, @AuthenticationPrincipal CustomerUserDetails userDetails) {
+        if (userDetails != null) {
+            String username = userDetails.getName();
+            model.addAttribute("name", username);
+            System.out.println(username + "유저 정보");
+        } else {
+            System.out.println("인증된 사용자 정보가 없습니다.");
+        }
+        return "main";
+    }
+
+/*    @GetMapping("/main")
+    public String mainPage() {
+        return "main"; // templates 폴더 내의 main.html을 참조
+    }*/
+
+
+
+/*
     @GetMapping("/login")
     public String showLoginForm() {
         return "login"; // "login.html" 타임리프 템플릿을 찾아 렌더링
     }
+*/
 
+/*
     @GetMapping("/logout")
     public String logout(HttpServletRequest request, HttpServletResponse response) {
-        new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if(auth != null){
+            new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
+        }
+
         return "redirect:/login";
     }
+*/
 
-    @GetMapping("/check")
-    public String checkSession(HttpSession session){
-        return session.getAttribute("user") + "님";
-    }
     @GetMapping("/signup")
     public String signup() {
         return "signup";

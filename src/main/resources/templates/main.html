@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <title>메인 페이지</title>
+
+</head>
+<body>
+<header class="header">
+    <span th:text="${name}">사용자 이름</span> |
+    <a href="#" th:href="@{/my-page}">마이페이지</a> |
+    <!-- 로그아웃 버튼 -->
+    <form th:action="@{/logout}" method="post" style="display: inline;">
+        <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+        <button type="submit">로그아웃</button>
+    </form>
+</header>
+<div class="main-content">
+    <h1>환영합니다!</h1>
+    <p>메인 페이지에 오신 것을 환영합니다.</p>
+</div>
+<script src="/js/main.js"></script>
+</body>
+</html>
